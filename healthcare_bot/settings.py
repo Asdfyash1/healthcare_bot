@@ -128,5 +128,5 @@ GOOGLE_PLACES_API_KEY = 'YOUR_API_KEY'
 # NVIDIA NIM API (build.nvidia.com)
 # Get your free API key from: https://build.nvidia.com
 NVIDIA_API_KEY = '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'
-NVIDIA_MODEL = 'nvidia/llama-3.1-nemotron-70b-instruct'
+NVIDIA_MODEL = 'nvidia/nemotron-3-super-120b-a12b'
 

@@ -482,7 +482,6 @@ export default function HealthBotAI() {
   const [authPassword, setAuthPassword] = useState("");
   const [authName, setAuthName] = useState("");
   const [authLoading, setAuthLoading] = useState(false);
-  const [authError, setAuthError] = useState("");
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   // Effects
@@ -493,7 +492,6 @@ export default function HealthBotAI() {
         if (data.success && data.user) {
           setIsAuthenticated(true);
           setUser(data.user);
-          setCurrentPage("chat");
         }
       })
       .catch(console.error);
@@ -551,7 +549,6 @@ export default function HealthBotAI() {
   const handleLogin = useCallback(async (e: React.FormEvent) => {
     e.preventDefault();
     setAuthLoading(true);
-    setAuthError("");
     try {
       const res = await fetch('/users/api/login/', {
         method: 'POST',
@@ -566,14 +563,10 @@ export default function HealthBotAI() {
         setCurrentPage("chat");
         toast.success("Welcome back!");
       } else {
-        const msg = data.message || "Invalid email or password. Please try again.";
-        setAuthError(msg);
-        toast.error(msg);
+        toast.error(data.message || "Login failed");
       }
     } catch (err) {
-      const msg = "Connection error. Please check your network.";
-      setAuthError(msg);
-      toast.error(msg);
+      toast.error("An error occurred during login.");
     } finally {
       setAuthLoading(false);
       setAuthPassword("");
@@ -583,7 +576,6 @@ export default function HealthBotAI() {
   const handleRegister = useCallback(async (e: React.FormEvent) => {
     e.preventDefault();
     setAuthLoading(true);
-    setAuthError("");
     try {
       const res = await fetch('/users/api/register/', {
         method: 'POST',
@@ -598,14 +590,10 @@ export default function HealthBotAI() {
         setCurrentPage("chat");
         toast.success("Account created successfully!");
       } else {
-        const msg = data.message || "Registration failed. Please try again.";
-        setAuthError(msg);
-        toast.error(msg);
+        toast.error(data.message || "Registration failed");
       }
     } catch (err) {
-      const msg = "Connection error. Please check your network.";
-      setAuthError(msg);
-      toast.error(msg);
+      toast.error("An error occurred during registration.");
     } finally {
       setAuthLoading(false);
       setAuthPassword("");
@@ -1328,16 +1316,11 @@ export default function HealthBotAI() {
           <DialogTitle className="text-xl font-bold text-center">{authMode === "login" ? "Welcome Back" : "Create Account"}</DialogTitle>
           <DialogDescription className="text-center text-slate-400 text-sm">{authMode === "login" ? "Sign in to continue" : "Join HealthBot AI"}</DialogDescription>
         </DialogHeader>
-        <Tabs value={authMode} onValueChange={(v) => { setAuthMode(v as "login" | "register"); setAuthError(""); }}>
+        <Tabs value={authMode} onValueChange={(v) => setAuthMode(v as "login" | "register")}>
           <TabsList className="grid w-full grid-cols-2 bg-white/5 mb-5 h-9">
             <TabsTrigger value="login" className="data-[state=active]:bg-indigo-500 data-[state=active]:text-white text-xs">Login</TabsTrigger>
             <TabsTrigger value="register" className="data-[state=active]:bg-indigo-500 data-[state=active]:text-white text-xs">Register</TabsTrigger>
           </TabsList>
-          {authError && (
-            <div className="mb-3 px-3 py-2 rounded-lg bg-red-500/10 border border-red-500/30 text-red-400 text-xs flex items-center gap-2">
-              <span className="text-red-400">⚠</span> {authError}
-            </div>
-          )}
           <TabsContent value="login">
             <form onSubmit={handleLogin} className="space-y-3">
               <div><Label className="text-slate-300 text-xs">Email</Label><div className="relative mt-1"><Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" /><Input type="email" value={authEmail} onChange={(e) => setAuthEmail(e.target.value)} placeholder="you@example.com" className="pl-9 bg-white/5 border-white/10 text-white placeholder:text-slate-500" required /></div></div>
