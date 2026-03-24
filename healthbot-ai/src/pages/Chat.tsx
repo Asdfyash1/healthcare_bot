@@ -39,8 +39,7 @@ export default function Chat() {
     setIsTyping(true);
 
     try {
-      const baseUrl = import.meta.env.VITE_API_URL || '/api';
-      const response = await fetch(`${baseUrl}/get_response/`, {
+      const response = await fetch('/api/get_response/', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ message: input }),
