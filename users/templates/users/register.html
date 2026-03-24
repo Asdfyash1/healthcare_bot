@@ -1,0 +1,49 @@
+{% extends 'base.html' %}
+
+{% block title %}Register - HealthBot AI{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center mt-4">
+    <div class="col-md-6 col-lg-5">
+        <div class="glass-card">
+            <h2 class="page-title text-center">
+                <i class="bi bi-person-plus" style="-webkit-text-fill-color: initial; background: none;"></i>
+                Create Account
+            </h2>
+            <p class="text-center mb-4" style="color: var(--text-secondary);">
+                Join HealthBot AI and get instant health insights
+            </p>
+            <form method="post">
+                {% csrf_token %}
+                {% for field in form %}
+                <div class="mb-3">
+                    <label for="{{ field.id_for_label }}" class="form-label">{{ field.label }}</label>
+                    {{ field }}
+                    {% if field.help_text %}
+                    <div class="form-text" style="color: var(--text-secondary); font-size: 0.8rem;">{{ field.help_text }}</div>
+                    {% endif %}
+                    {% for error in field.errors %}
+                    <div class="text-danger mt-1" style="font-size: 0.85rem;">{{ error }}</div>
+                    {% endfor %}
+                </div>
+                {% endfor %}
+                <button type="submit" class="btn btn-primary-gradient w-100 mt-2">
+                    <i class="bi bi-check-circle me-1"></i>Register
+                </button>
+            </form>
+            <p class="text-center mt-3" style="color: var(--text-secondary);">
+                Already have an account? <a href="{% url 'login' %}">Login here</a>
+            </p>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Style Django form fields with Bootstrap classes
+    document.querySelectorAll('input[type="text"], input[type="password"]').forEach(el => {
+        el.classList.add('form-control');
+    });
+</script>
+{% endblock %}

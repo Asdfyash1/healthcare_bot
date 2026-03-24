@@ -1,0 +1,57 @@
+{% extends 'base.html' %}
+
+{% block title %}Profile - HealthBot AI{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center mt-4">
+    <div class="col-md-8 col-lg-6">
+        <div class="glass-card text-center">
+            <div style="width: 90px; height: 90px; border-radius: 50%; background: var(--primary-gradient); display: flex; align-items: center; justify-content: center; margin: 0 auto 1.5rem; font-size: 2.5rem; color: white;">
+                <i class="bi bi-person-fill"></i>
+            </div>
+            <h2 class="page-title">{{ user.username }}</h2>
+            <p style="color: var(--text-secondary); font-size: 1.1rem;">
+                <i class="bi bi-envelope me-1"></i>
+                {{ user.email|default:"No email set" }}
+            </p>
+
+            <div class="row mt-4 text-start">
+                <div class="col-sm-6 mb-3">
+                    <div class="glass-card" style="padding: 1rem;">
+                        <small style="color: var(--text-secondary);">Username</small>
+                        <p class="mb-0 mt-1" style="font-weight: 600;">{{ user.username }}</p>
+                    </div>
+                </div>
+                <div class="col-sm-6 mb-3">
+                    <div class="glass-card" style="padding: 1rem;">
+                        <small style="color: var(--text-secondary);">Date Joined</small>
+                        <p class="mb-0 mt-1" style="font-weight: 600;">{{ user.date_joined|date:"M d, Y" }}</p>
+                    </div>
+                </div>
+                <div class="col-sm-6 mb-3">
+                    <div class="glass-card" style="padding: 1rem;">
+                        <small style="color: var(--text-secondary);">Last Login</small>
+                        <p class="mb-0 mt-1" style="font-weight: 600;">{{ user.last_login|date:"M d, Y H:i" }}</p>
+                    </div>
+                </div>
+                <div class="col-sm-6 mb-3">
+                    <div class="glass-card" style="padding: 1rem;">
+                        <small style="color: var(--text-secondary);">Account Status</small>
+                        <p class="mb-0 mt-1" style="font-weight: 600;">
+                            {% if user.is_staff %}
+                            <span class="badge badge-staff">Staff</span>
+                            {% else %}
+                            <span style="color: var(--accent-teal);">Active</span>
+                            {% endif %}
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <a href="{% url 'change_password' %}" class="btn btn-primary-gradient mt-3">
+                <i class="bi bi-key me-1"></i>Change Password
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}

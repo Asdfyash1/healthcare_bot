@@ -1,0 +1,42 @@
+{% extends 'base.html' %}
+
+{% block title %}Login - HealthBot AI{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center mt-4">
+    <div class="col-md-6 col-lg-5">
+        <div class="glass-card">
+            <h2 class="page-title text-center">
+                <i class="bi bi-box-arrow-in-right" style="-webkit-text-fill-color: initial; background: none;"></i>
+                Welcome Back
+            </h2>
+            <p class="text-center mb-4" style="color: var(--text-secondary);">
+                Sign in to continue using HealthBot AI
+            </p>
+            {% if form.errors %}
+            <div class="alert alert-danger">
+                <i class="bi bi-exclamation-triangle me-1"></i>
+                Invalid username or password. Please try again.
+            </div>
+            {% endif %}
+            <form method="post">
+                {% csrf_token %}
+                <div class="mb-3">
+                    <label for="id_username" class="form-label">Username</label>
+                    <input type="text" name="username" id="id_username" class="form-control" placeholder="Enter your username" required autofocus>
+                </div>
+                <div class="mb-3">
+                    <label for="id_password" class="form-label">Password</label>
+                    <input type="password" name="password" id="id_password" class="form-control" placeholder="Enter your password" required>
+                </div>
+                <button type="submit" class="btn btn-primary-gradient w-100 mt-2">
+                    <i class="bi bi-unlock me-1"></i>Login
+                </button>
+            </form>
+            <p class="text-center mt-3" style="color: var(--text-secondary);">
+                Don't have an account? <a href="{% url 'register' %}">Register here</a>
+            </p>
+        </div>
+    </div>
+</div>
+{% endblock %}

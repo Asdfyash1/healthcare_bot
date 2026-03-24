@@ -1,0 +1,247 @@
+{% extends 'base.html' %}
+
+{% block title %}Find {{ type|title }}s - HealthBot AI{% endblock %}
+
+{% block extra_css %}
+<style>
+    .finder-hero {
+        text-align: center;
+        padding: 2rem 0 1.5rem;
+    }
+
+    .finder-icon {
+        width: 80px;
+        height: 80px;
+        border-radius: 50%;
+        background: var(--primary-gradient);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 1.5rem;
+        font-size: 2rem;
+        color: white;
+    }
+
+    .btn-find {
+        background: var(--primary-gradient);
+        border: none;
+        color: white;
+        padding: 0.8rem 2.5rem;
+        border-radius: 12px;
+        font-weight: 600;
+        font-size: 1.05rem;
+        transition: all 0.3s ease;
+        cursor: pointer;
+    }
+
+    .btn-find:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+        color: white;
+    }
+
+    .btn-find:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+        transform: none;
+    }
+
+    .results-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+        gap: 1.2rem;
+        margin-top: 2rem;
+    }
+
+    .place-card {
+        background: var(--glass-bg);
+        border: 1px solid var(--glass-border);
+        border-radius: 14px;
+        padding: 1.5rem;
+        transition: all 0.3s ease;
+        animation: slideIn 0.4s ease;
+    }
+
+    .place-card:hover {
+        border-color: rgba(102, 126, 234, 0.3);
+        transform: translateY(-3px);
+        box-shadow: 0 8px 25px rgba(102, 126, 234, 0.15);
+    }
+
+    .place-name {
+        font-weight: 600;
+        font-size: 1.1rem;
+        color: var(--text-primary);
+        margin-bottom: 0.5rem;
+    }
+
+    .place-address {
+        color: var(--text-secondary);
+        font-size: 0.9rem;
+        margin-bottom: 0.5rem;
+    }
+
+    .place-rating {
+        display: flex;
+        align-items: center;
+        gap: 0.3rem;
+        font-size: 0.9rem;
+    }
+
+    .place-rating .stars {
+        color: #ffc107;
+    }
+
+    .place-status {
+        display: inline-block;
+        padding: 0.2em 0.6em;
+        border-radius: 6px;
+        font-size: 0.75rem;
+        font-weight: 600;
+    }
+
+    .status-open {
+        background: rgba(23, 234, 217, 0.1);
+        color: var(--accent-teal);
+    }
+
+    .status-closed {
+        background: rgba(234, 23, 58, 0.1);
+        color: #ff6b6b;
+    }
+
+    .spinner-border {
+        color: var(--accent-blue);
+    }
+
+    @keyframes slideIn {
+        from { opacity: 0; transform: translateY(15px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="finder-hero">
+    <div class="finder-icon">
+        {% if type == 'doctor' %}
+        <i class="bi bi-person-badge"></i>
+        {% else %}
+        <i class="bi bi-hospital"></i>
+        {% endif %}
+    </div>
+    <h2 class="page-title">Find Nearby {{ type|title }}s</h2>
+    <p style="color: var(--text-secondary); max-width: 500px; margin: 0 auto 1.5rem;">
+        Use your current location to discover {{ type }}s near you. We'll search within a 5km radius.
+    </p>
+    <button class="btn-find" id="findBtn" onclick="findPlaces()">
+        <i class="bi bi-geo-alt me-2"></i>Find {{ type|title }}s Near Me
+    </button>
+</div>
+
+<div id="statusMsg" class="text-center mt-3" style="display: none;"></div>
+
+<div id="resultsGrid" class="results-grid"></div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    const placeType = '{{ type }}';
+    const endpoint = placeType === 'doctor' ? '{% url "nearby_doctors" %}' : '{% url "nearby_hospitals" %}';
+
+    function findPlaces() {
+        const btn = document.getElementById('findBtn');
+        const statusMsg = document.getElementById('statusMsg');
+        const resultsGrid = document.getElementById('resultsGrid');
+
+        btn.disabled = true;
+        btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Locating...';
+        statusMsg.style.display = 'block';
+        statusMsg.innerHTML = '<span style="color: var(--text-secondary);">📍 Getting your location...</span>';
+        resultsGrid.innerHTML = '';
+
+        if (!navigator.geolocation) {
+            statusMsg.innerHTML = '<div class="alert alert-danger">Geolocation is not supported by your browser.</div>';
+            btn.disabled = false;
+            btn.innerHTML = `<i class="bi bi-geo-alt me-2"></i>Find ${placeType.charAt(0).toUpperCase() + placeType.slice(1)}s Near Me`;
+            return;
+        }
+
+        navigator.geolocation.getCurrentPosition(
+            (position) => {
+                const lat = position.coords.latitude;
+                const lng = position.coords.longitude;
+                statusMsg.innerHTML = '<span style="color: var(--accent-teal);">✅ Location found! Searching...</span>';
+
+                fetch(`${endpoint}?lat=${lat}&lng=${lng}`)
+                    .then(res => res.json())
+                    .then(data => {
+                        btn.disabled = false;
+                        btn.innerHTML = `<i class="bi bi-geo-alt me-2"></i>Find ${placeType.charAt(0).toUpperCase() + placeType.slice(1)}s Near Me`;
+
+                        if (data.error) {
+                            statusMsg.innerHTML = `<div class="alert alert-warning"><i class="bi bi-exclamation-triangle me-1"></i>${data.error}</div>`;
+                            return;
+                        }
+
+                        if (!data.places || data.places.length === 0) {
+                            statusMsg.innerHTML = '<div class="alert alert-info">No places found nearby. Try again from a different location.</div>';
+                            return;
+                        }
+
+                        statusMsg.innerHTML = `<span style="color: var(--accent-teal);">Found <strong>${data.places.length}</strong> ${placeType}(s) near you</span>`;
+
+                        data.places.forEach((place, i) => {
+                            const card = document.createElement('div');
+                            card.className = 'place-card';
+                            card.style.animationDelay = `${i * 0.05}s`;
+
+                            let statusHtml = '';
+                            if (place.open_now !== null) {
+                                statusHtml = place.open_now
+                                    ? '<span class="place-status status-open">Open Now</span>'
+                                    : '<span class="place-status status-closed">Closed</span>';
+                            }
+
+                            let ratingStars = '';
+                            if (place.rating !== 'N/A') {
+                                const full = Math.floor(place.rating);
+                                for (let s = 0; s < full; s++) ratingStars += '★';
+                                for (let s = full; s < 5; s++) ratingStars += '☆';
+                            }
+
+                            card.innerHTML = `
+                                <div class="place-name">
+                                    <i class="bi bi-${placeType === 'doctor' ? 'person-badge' : 'hospital'} me-1" style="color: var(--accent-blue);"></i>
+                                    ${place.name}
+                                </div>
+                                <div class="place-address">
+                                    <i class="bi bi-geo-alt me-1"></i>${place.address}
+                                </div>
+                                <div class="d-flex justify-content-between align-items-center mt-2">
+                                    <div class="place-rating">
+                                        <span class="stars">${ratingStars}</span>
+                                        <span style="color: var(--text-secondary);">${place.rating !== 'N/A' ? place.rating : '—'}</span>
+                                        <small style="color: var(--text-secondary);">(${place.total_ratings})</small>
+                                    </div>
+                                    ${statusHtml}
+                                </div>
+                            `;
+                            resultsGrid.appendChild(card);
+                        });
+                    })
+                    .catch(err => {
+                        btn.disabled = false;
+                        btn.innerHTML = `<i class="bi bi-geo-alt me-2"></i>Find ${placeType.charAt(0).toUpperCase() + placeType.slice(1)}s Near Me`;
+                        statusMsg.innerHTML = '<div class="alert alert-danger">Failed to fetch results. Please try again.</div>';
+                    });
+            },
+            (error) => {
+                btn.disabled = false;
+                btn.innerHTML = `<i class="bi bi-geo-alt me-2"></i>Find ${placeType.charAt(0).toUpperCase() + placeType.slice(1)}s Near Me`;
+                statusMsg.innerHTML = '<div class="alert alert-warning"><i class="bi bi-shield-exclamation me-1"></i>Location access denied. Please enable location services and try again.</div>';
+            }
+        );
+    }
+</script>
+{% endblock %}

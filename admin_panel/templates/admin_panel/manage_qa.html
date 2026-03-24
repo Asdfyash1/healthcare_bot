@@ -1,0 +1,60 @@
+{% extends 'base.html' %}
+
+{% block title %}Manage Q&A - HealthBot AI{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2 class="page-title mb-0">
+        <i class="bi bi-database-gear" style="-webkit-text-fill-color: initial; background: none;"></i>
+        Q&A Management
+    </h2>
+    <a href="{% url 'add_qa' %}" class="btn btn-primary-gradient">
+        <i class="bi bi-plus-circle me-1"></i>Add New Q&A
+    </a>
+</div>
+
+{% if qna_list %}
+<div class="glass-card" style="padding: 0; overflow: hidden;">
+    <div class="table-responsive">
+        <table class="table table-hover mb-0">
+            <thead>
+                <tr>
+                    <th style="padding: 1rem 1.2rem;">#</th>
+                    <th style="padding: 1rem 1.2rem;">Label</th>
+                    <th style="padding: 1rem 1.2rem;">Answer (Preview)</th>
+                    <th style="padding: 1rem 1.2rem;">Keywords</th>
+                    <th style="padding: 1rem 1.2rem; text-align: center;">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for qna in qna_list %}
+                <tr>
+                    <td style="padding: 0.8rem 1.2rem;">{{ forloop.counter }}</td>
+                    <td style="padding: 0.8rem 1.2rem; font-weight: 600;">{{ qna.label }}</td>
+                    <td style="padding: 0.8rem 1.2rem; max-width: 300px;">
+                        {{ qna.answer|truncatewords:15 }}
+                    </td>
+                    <td style="padding: 0.8rem 1.2rem; color: var(--text-secondary);">
+                        {{ qna.keywords|default:"—" }}
+                    </td>
+                    <td style="padding: 0.8rem 1.2rem; text-align: center; white-space: nowrap;">
+                        <a href="{% url 'edit_qa' qna.id %}" class="btn btn-sm" style="background: rgba(102,126,234,0.15); color: var(--accent-blue); border-radius: 8px; margin-right: 0.3rem;">
+                            <i class="bi bi-pencil-square"></i>
+                        </a>
+                        <a href="{% url 'delete_qa' qna.id %}" class="btn btn-sm" style="background: rgba(234,23,58,0.15); color: #ff6b6b; border-radius: 8px;">
+                            <i class="bi bi-trash3"></i>
+                        </a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% else %}
+<div class="glass-card text-center" style="padding: 3rem;">
+    <i class="bi bi-inbox" style="font-size: 3rem; color: var(--text-secondary);"></i>
+    <p class="mt-3" style="color: var(--text-secondary);">No Q&A entries yet. Click "Add New Q&A" to get started.</p>
+</div>
+{% endif %}
+{% endblock %}
