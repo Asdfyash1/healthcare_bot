@@ -49,7 +49,7 @@ except Exception as e:
 
 def chat_page(request):
     """Render the chat interface."""
-    return render(request, 'chatbot/chat.html')
+    return render(request, 'index.html')
 
 
 def get_cnn_prediction(user_message):

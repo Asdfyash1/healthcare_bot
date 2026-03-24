@@ -1,7 +1,8 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  output: "standalone",
+  output: "export",
+  assetPrefix: "/static/",
   /* config options here */
   typescript: {
     ignoreBuildErrors: true,

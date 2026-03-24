@@ -24,8 +24,8 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: "HealthBot AI - Your AI Healthcare Assistant",
-  description: "AI-powered healthcare chatbot. Get instant medical guidance, find doctors, and locate hospitals near you.",
-  keywords: ["HealthBot", "AI Healthcare", "Medical Assistant", "Find Doctors", "Hospital Finder"],
+  description: "AI-powered healthcare chatbot powered by NVIDIA Nemotron. Get instant medical guidance, find doctors, and locate hospitals near you.",
+  keywords: ["HealthBot", "AI Healthcare", "NVIDIA Nemotron", "Medical Assistant", "Find Doctors", "Hospital Finder"],
   authors: [{ name: "HealthBot AI Team" }],
   icons: {
     icon: "/logo.svg",

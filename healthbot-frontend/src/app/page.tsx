@@ -455,7 +455,7 @@ const ChatInput = ({
           <Send className="w-4 h-4" />
         </Button>
       </form>
-      <p className="text-slate-600 text-xs text-center mt-2">HealthBot AI will make mistakes please check it thoroughly.</p>
+      <p className="text-slate-600 text-xs text-center mt-2">This AI provides general information only. Consult a professional for medical advice.</p>
     </div>
   );
 };
@@ -478,19 +478,31 @@ export default function HealthBotAI() {
   const [specialtyFilter, setSpecialtyFilter] = useState("all");
   const [hospitalSearchQuery, setHospitalSearchQuery] = useState("");
   const [user, setUser] = useState<UserProfile | null>(null);
+  const [authEmail, setAuthEmail] = useState("");
+  const [authPassword, setAuthPassword] = useState("");
+  const [authName, setAuthName] = useState("");
+  const [authLoading, setAuthLoading] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   // Effects
   useEffect(() => {
-    setUser(isAuthenticated ? USER_PROFILE : null);
-  }, [isAuthenticated]);
+    fetch('/users/api/me/')
+      .then(res => res.json())
+      .then(data => {
+        if (data.success && data.user) {
+          setIsAuthenticated(true);
+          setUser(data.user);
+        }
+      })
+      .catch(console.error);
+  }, []);
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
   // Handlers
-  const handleSendMessage = useCallback(() => {
+  const handleSendMessage = useCallback(async () => {
     if (!inputMessage.trim()) return;
 
     const userMessage: Message = {
@@ -501,64 +513,103 @@ export default function HealthBotAI() {
     };
 
     setMessages((prev) => [...prev, userMessage]);
+    const currentInput = inputMessage;
     setInputMessage("");
     setIsTyping(true);
 
-    const fetchResponse = async () => {
-      try {
-        const res = await fetch('http://127.0.0.1:8000/chat/get_response/', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ message: inputMessage }),
-        });
-        const data = await res.json();
-        const botMessage: Message = {
-          id: `bot-${Date.now()}`,
-          role: "assistant",
-          content: data.response || "No response received.",
-          timestamp: new Date(),
-        };
-        setMessages((prev) => [...prev, botMessage]);
-      } catch (error) {
-        const errorMsg: Message = {
-          id: `bot-${Date.now()}`,
-          role: "assistant",
-          content: "⚠️ Error connecting to the server.",
-          timestamp: new Date(),
-        };
-        setMessages((prev) => [...prev, errorMsg]);
-      } finally {
-        setIsTyping(false);
-      }
-    };
-    
-    fetchResponse();
+    try {
+      const res = await fetch('/chat/get_response/', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ message: currentInput })
+      });
+      const data = await res.json();
+      
+      const botMessage: Message = {
+        id: `bot-${Date.now()}`,
+        role: "assistant",
+        content: data.response || "Sorry, I could not process your request.",
+        timestamp: new Date(),
+      };
+      setMessages((prev) => [...prev, botMessage]);
+    } catch (error) {
+      console.error(error);
+      const errorMessage: Message = {
+        id: `error-${Date.now()}`,
+        role: "assistant",
+        content: "Network error occurred while reaching the server.",
+        timestamp: new Date(),
+      };
+      setMessages((prev) => [...prev, errorMessage]);
+    } finally {
+      setIsTyping(false);
+    }
   }, [inputMessage]);
 
-  const handleLogin = useCallback((e: React.FormEvent) => {
+  const handleLogin = useCallback(async (e: React.FormEvent) => {
     e.preventDefault();
-    setIsAuthenticated(true);
-    setShowAuthModal(false);
-    setCurrentPage("chat");
-    toast.success("Welcome back!");
-  }, []);
+    setAuthLoading(true);
+    try {
+      const res = await fetch('/users/api/login/', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: authEmail, password: authPassword })
+      });
+      const data = await res.json();
+      if (data.success) {
+        setIsAuthenticated(true);
+        setUser(data.user);
+        setShowAuthModal(false);
+        setCurrentPage("chat");
+        toast.success("Welcome back!");
+      } else {
+        toast.error(data.message || "Login failed");
+      }
+    } catch (err) {
+      toast.error("An error occurred during login.");
+    } finally {
+      setAuthLoading(false);
+      setAuthPassword("");
+    }
+  }, [authEmail, authPassword]);
 
-  const handleRegister = useCallback((e: React.FormEvent) => {
+  const handleRegister = useCallback(async (e: React.FormEvent) => {
     e.preventDefault();
-    setIsAuthenticated(true);
-    setShowAuthModal(false);
-    setCurrentPage("chat");
-    toast.success("Account created successfully!");
-  }, []);
+    setAuthLoading(true);
+    try {
+      const res = await fetch('/users/api/register/', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name: authName, email: authEmail, password: authPassword })
+      });
+      const data = await res.json();
+      if (data.success) {
+        setIsAuthenticated(true);
+        setUser(data.user);
+        setShowAuthModal(false);
+        setCurrentPage("chat");
+        toast.success("Account created successfully!");
+      } else {
+        toast.error(data.message || "Registration failed");
+      }
+    } catch (err) {
+      toast.error("An error occurred during registration.");
+    } finally {
+      setAuthLoading(false);
+      setAuthPassword("");
+    }
+  }, [authEmail, authPassword, authName]);
 
-  const handleLogout = useCallback(() => {
+  const handleLogout = useCallback(async () => {
+    try {
+      await fetch('/users/api/logout/', { method: 'POST' });
+    } catch (e) { console.error(e); }
     setIsAuthenticated(false);
     setUser(null);
     setCurrentPage("landing");
     setMessages([]);
     toast.info("Logged out successfully");
   }, []);
-
   // Filtered Data
   const filteredDoctors = useMemo(() => 
     DOCTORS.filter((doctor) => {
@@ -723,6 +774,17 @@ export default function HealthBotAI() {
 
         <div className="max-w-7xl mx-auto relative">
           <motion.div className="text-center" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
+            {/* Badge */}
+            <motion.div
+              className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-indigo-500/10 border border-indigo-500/20 mb-6"
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ delay: 0.1 }}
+            >
+              <Cpu className="w-3.5 h-3.5 text-indigo-400" />
+              <span className="text-xs text-indigo-300 font-medium">Powered by NVIDIA Nemotron</span>
+            </motion.div>
+
             {/* Heading */}
             <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight mb-5">
               <span className="text-white">Your AI Healthcare</span>
@@ -769,6 +831,10 @@ export default function HealthBotAI() {
                     </div>
                   </div>
                 </div>
+                <Badge variant="outline" className="text-xs border-indigo-500/30 text-indigo-300">
+                  <Sparkles className="w-3 h-3 mr-1" />
+                  NIM Powered
+                </Badge>
               </div>
 
               {/* Sample Messages */}
@@ -880,9 +946,10 @@ export default function HealthBotAI() {
             </div>
             <span className="text-slate-500 text-sm">© 2024 HealthBot AI</span>
           </div>
-          <p className="text-xs text-slate-500 text-center flex-1 md:ml-4 text-balance">
-            HealthBot AI will make mistakes please check it thoroughly.
-          </p>
+          <Badge variant="outline" className="text-xs border-white/10 text-slate-500">
+            <Cpu className="w-3 h-3 mr-1" />
+            NVIDIA NIM
+          </Badge>
         </div>
       </footer>
     </div>
@@ -909,6 +976,10 @@ export default function HealthBotAI() {
               </div>
             </div>
           </div>
+          <Badge variant="outline" className="text-xs border-indigo-500/30 text-indigo-300">
+            <Sparkles className="w-3 h-3 mr-1" />
+            NIM
+          </Badge>
         </div>
 
         {/* Messages */}
@@ -1252,17 +1323,17 @@ export default function HealthBotAI() {
           </TabsList>
           <TabsContent value="login">
             <form onSubmit={handleLogin} className="space-y-3">
-              <div><Label className="text-slate-300 text-xs">Email</Label><div className="relative mt-1"><Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" /><Input type="email" placeholder="you@example.com" className="pl-9 bg-white/5 border-white/10 text-white placeholder:text-slate-500" required /></div></div>
-              <div><Label className="text-slate-300 text-xs">Password</Label><div className="relative mt-1"><Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" /><Input type={showPassword ? "text" : "password"} placeholder="••••••••" className="pl-9 pr-9 bg-white/5 border-white/10 text-white placeholder:text-slate-500" required /><button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-500 hover:text-white">{showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}</button></div></div>
-              <Button type="submit" className="w-full btn-primary">Sign In <ArrowRight className="w-4 h-4 ml-1.5" /></Button>
+              <div><Label className="text-slate-300 text-xs">Email</Label><div className="relative mt-1"><Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" /><Input type="email" value={authEmail} onChange={(e) => setAuthEmail(e.target.value)} placeholder="you@example.com" className="pl-9 bg-white/5 border-white/10 text-white placeholder:text-slate-500" required /></div></div>
+              <div><Label className="text-slate-300 text-xs">Password</Label><div className="relative mt-1"><Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" /><Input type={showPassword ? "text" : "password"} value={authPassword} onChange={(e) => setAuthPassword(e.target.value)} placeholder="••••••••" className="pl-9 pr-9 bg-white/5 border-white/10 text-white placeholder:text-slate-500" required /><button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-500 hover:text-white">{showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}</button></div></div>
+              <Button type="submit" disabled={authLoading} className="w-full btn-primary">{authLoading ? "Authenticating..." : "Sign In"} <ArrowRight className="w-4 h-4 ml-1.5" /></Button>
             </form>
           </TabsContent>
           <TabsContent value="register">
             <form onSubmit={handleRegister} className="space-y-3">
-              <div><Label className="text-slate-300 text-xs">Full Name</Label><div className="relative mt-1"><User className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" /><Input type="text" placeholder="John Doe" className="pl-9 bg-white/5 border-white/10 text-white placeholder:text-slate-500" required /></div></div>
-              <div><Label className="text-slate-300 text-xs">Email</Label><div className="relative mt-1"><Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" /><Input type="email" placeholder="you@example.com" className="pl-9 bg-white/5 border-white/10 text-white placeholder:text-slate-500" required /></div></div>
-              <div><Label className="text-slate-300 text-xs">Password</Label><div className="relative mt-1"><Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" /><Input type={showPassword ? "text" : "password"} placeholder="••••••••" className="pl-9 pr-9 bg-white/5 border-white/10 text-white placeholder:text-slate-500" required /><button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-500 hover:text-white">{showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}</button></div></div>
-              <Button type="submit" className="w-full btn-primary">Create Account <ArrowRight className="w-4 h-4 ml-1.5" /></Button>
+              <div><Label className="text-slate-300 text-xs">Full Name</Label><div className="relative mt-1"><User className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" /><Input type="text" value={authName} onChange={(e) => setAuthName(e.target.value)} placeholder="John Doe" className="pl-9 bg-white/5 border-white/10 text-white placeholder:text-slate-500" required /></div></div>
+              <div><Label className="text-slate-300 text-xs">Email</Label><div className="relative mt-1"><Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" /><Input type="email" value={authEmail} onChange={(e) => setAuthEmail(e.target.value)} placeholder="you@example.com" className="pl-9 bg-white/5 border-white/10 text-white placeholder:text-slate-500" required /></div></div>
+              <div><Label className="text-slate-300 text-xs">Password</Label><div className="relative mt-1"><Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" /><Input type={showPassword ? "text" : "password"} value={authPassword} onChange={(e) => setAuthPassword(e.target.value)} placeholder="••••••••" className="pl-9 pr-9 bg-white/5 border-white/10 text-white placeholder:text-slate-500" required /><button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-500 hover:text-white">{showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}</button></div></div>
+              <Button type="submit" disabled={authLoading} className="w-full btn-primary">{authLoading ? "Creating..." : "Create Account"} <ArrowRight className="w-4 h-4 ml-1.5" /></Button>
             </form>
           </TabsContent>
         </Tabs>
