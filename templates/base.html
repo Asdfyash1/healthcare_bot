@@ -1,0 +1,479 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="CureX — Your AI-powered health companion. Get instant medical guidance powered by advanced AI.">
+    <title>{% block title %}CureX — AI Health Companion{% endblock %}</title>
+
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Sora:wght@600;700;800&display=swap" rel="stylesheet">
+    <!-- Bootstrap Icons -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+
+    <style>
+        :root {
+            --c-bg: #070b14;
+            --c-surface: rgba(255,255,255,0.04);
+            --c-surface-hover: rgba(255,255,255,0.07);
+            --c-border: rgba(255,255,255,0.08);
+            --c-border-accent: rgba(0,212,170,0.35);
+
+            --c-primary: #00d4aa;
+            --c-primary-dark: #00a880;
+            --c-secondary: #7c5cfc;
+            --c-accent: #ff6b9d;
+
+            --c-grad-primary: linear-gradient(135deg, #00d4aa 0%, #7c5cfc 100%);
+            --c-grad-glow: linear-gradient(135deg, rgba(0,212,170,0.15) 0%, rgba(124,92,252,0.15) 100%);
+
+            --c-text-primary: #f0f4ff;
+            --c-text-secondary: #8892a4;
+            --c-text-muted: #4a5568;
+
+            --radius-sm: 8px;
+            --radius-md: 14px;
+            --radius-lg: 20px;
+            --radius-xl: 28px;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        html { scroll-behavior: smooth; }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--c-bg);
+            color: var(--c-text-primary);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        /* === Animated mesh background === */
+        body::before {
+            content: '';
+            position: fixed;
+            inset: 0;
+            background:
+                radial-gradient(ellipse 80% 60% at 10% 20%, rgba(0,212,170,0.06) 0%, transparent 60%),
+                radial-gradient(ellipse 60% 80% at 90% 70%, rgba(124,92,252,0.07) 0%, transparent 60%),
+                radial-gradient(ellipse 50% 50% at 50% 50%, rgba(255,107,157,0.03) 0%, transparent 60%);
+            z-index: -1;
+            animation: meshPulse 10s ease-in-out infinite alternate;
+        }
+
+        @keyframes meshPulse {
+            from { opacity: 0.7; }
+            to   { opacity: 1;   }
+        }
+
+        /* === Navbar === */
+        .navbar {
+            background: rgba(7,11,20,0.85);
+            backdrop-filter: blur(24px);
+            -webkit-backdrop-filter: blur(24px);
+            border-bottom: 1px solid var(--c-border);
+            padding: 0.9rem 0;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+
+        .navbar-inner {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 2rem;
+        }
+
+        .navbar-brand {
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+            text-decoration: none;
+            flex-shrink: 0;
+            transition: transform 0.2s ease;
+        }
+
+        .navbar-brand:hover {
+            transform: scale(1.02);
+        }
+
+        .brand-logo-img {
+            width: 48px;
+            height: 48px;
+            object-fit: cover;
+            border-radius: 14px;
+            background: rgba(255,255,255,0.03);
+            border: 1px solid rgba(255,255,255,0.1);
+            padding: 0;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+        }
+
+        .navbar-brand:hover .brand-logo-img {
+            transform: translateY(-2px);
+            border-color: var(--c-primary);
+            box-shadow: 0 8px 25px rgba(0,212,170,0.3);
+        }
+
+        .brand-name {
+            font-family: 'Sora', sans-serif;
+            font-size: 1.6rem;
+            font-weight: 800;
+            background: var(--c-grad-primary);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            letter-spacing: -0.01em;
+        }
+
+        .navbar-nav {
+            display: flex;
+            align-items: center;
+            gap: 0.2rem;
+            list-style: none;
+            flex: 1;
+        }
+
+        .nav-link {
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+            color: var(--c-text-secondary);
+            text-decoration: none;
+            font-size: 0.9rem;
+            font-weight: 500;
+            padding: 0.5rem 0.9rem;
+            border-radius: var(--radius-sm);
+            transition: all 0.2s ease;
+        }
+
+        .nav-link:hover, .nav-link.active {
+            color: var(--c-text-primary);
+            background: var(--c-surface-hover);
+        }
+
+        .navbar-actions {
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+            margin-left: auto;
+        }
+
+        .btn-ghost {
+            color: var(--c-text-secondary);
+            text-decoration: none;
+            font-size: 0.875rem;
+            font-weight: 500;
+            padding: 0.5rem 1rem;
+            border-radius: var(--radius-sm);
+            border: 1px solid var(--c-border);
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+        }
+
+        .btn-ghost:hover {
+            color: var(--c-text-primary);
+            border-color: var(--c-border-accent);
+            background: var(--c-surface-hover);
+        }
+
+        .btn-primary {
+            background: var(--c-grad-primary);
+            color: white;
+            text-decoration: none;
+            font-size: 0.875rem;
+            font-weight: 600;
+            padding: 0.5rem 1.2rem;
+            border-radius: var(--radius-sm);
+            border: none;
+            transition: all 0.25s ease;
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+            cursor: pointer;
+            box-shadow: 0 0 20px rgba(0,212,170,0.2);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 6px 24px rgba(0,212,170,0.4);
+            color: white;
+        }
+
+        /* Mobile menu toggle */
+        .navbar-toggle {
+            display: none;
+            background: none;
+            border: 1px solid var(--c-border);
+            color: var(--c-text-primary);
+            padding: 0.4rem 0.7rem;
+            border-radius: var(--radius-sm);
+            cursor: pointer;
+            font-size: 1.1rem;
+            margin-left: auto;
+        }
+
+        /* === Main content === */
+        .main-content {
+            min-height: calc(100vh - 62px);
+        }
+
+        /* === Glass card === */
+        .glass-card {
+            background: var(--c-surface);
+            border: 1px solid var(--c-border);
+            border-radius: var(--radius-lg);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            padding: 2rem;
+            transition: border-color 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .glass-card:hover {
+            border-color: var(--c-border-accent);
+            box-shadow: 0 8px 40px rgba(0,212,170,0.08);
+        }
+
+        /* === Form controls === */
+        .form-group {
+            margin-bottom: 1.25rem;
+        }
+
+        .form-label {
+            display: block;
+            font-size: 0.875rem;
+            font-weight: 500;
+            color: var(--c-text-secondary);
+            margin-bottom: 0.5rem;
+        }
+
+        .form-control {
+            width: 100%;
+            background: rgba(255,255,255,0.04);
+            border: 1px solid var(--c-border);
+            border-radius: var(--radius-sm);
+            color: var(--c-text-primary);
+            padding: 0.75rem 1rem;
+            font-size: 0.95rem;
+            font-family: 'Inter', sans-serif;
+            outline: none;
+            transition: all 0.2s ease;
+        }
+
+        .form-control:focus {
+            border-color: var(--c-primary);
+            background: rgba(0,212,170,0.04);
+            box-shadow: 0 0 0 3px rgba(0,212,170,0.12);
+        }
+
+        .form-control::placeholder {
+            color: var(--c-text-muted);
+        }
+
+        /* === Alerts === */
+        .alert {
+            padding: 0.85rem 1.1rem;
+            border-radius: var(--radius-sm);
+            font-size: 0.9rem;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: flex-start;
+            gap: 0.6rem;
+        }
+
+        .alert-success {
+            background: rgba(0,212,170,0.1);
+            border: 1px solid rgba(0,212,170,0.25);
+            color: #00d4aa;
+        }
+
+        .alert-danger, .alert-error {
+            background: rgba(255,107,107,0.1);
+            border: 1px solid rgba(255,107,107,0.25);
+            color: #ff6b6b;
+        }
+
+        .alert-warning {
+            background: rgba(255,193,7,0.1);
+            border: 1px solid rgba(255,193,7,0.25);
+            color: #ffc107;
+        }
+
+        .alert-info {
+            background: rgba(124,92,252,0.1);
+            border: 1px solid rgba(124,92,252,0.25);
+            color: #a78bfa;
+        }
+
+        /* === Page title === */
+        .page-title {
+            font-family: 'Sora', sans-serif;
+            font-size: 2rem;
+            font-weight: 800;
+            background: var(--c-grad-primary);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 0.5rem;
+            letter-spacing: -0.03em;
+        }
+
+        /* === Gradient text === */
+        .gradient-text {
+            background: var(--c-grad-primary);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        /* === Scrollbar === */
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: rgba(0,212,170,0.25); border-radius: 3px; }
+        ::-webkit-scrollbar-thumb:hover { background: rgba(0,212,170,0.45); }
+
+        /* === Helper utilities === */
+        .text-muted    { color: var(--c-text-muted);     }
+        .text-secondary{ color: var(--c-text-secondary);  }
+        .text-center   { text-align: center;               }
+        .mt-1 { margin-top: 0.5rem;  }
+        .mt-2 { margin-top: 0.75rem; }
+        .mt-3 { margin-top: 1rem;    }
+        .mt-4 { margin-top: 1.5rem;  }
+        .mb-1 { margin-bottom: 0.5rem;  }
+        .mb-2 { margin-bottom: 0.75rem; }
+        .mb-3 { margin-bottom: 1rem;    }
+        .mb-4 { margin-bottom: 1.5rem;  }
+        .w-100 { width: 100%; }
+
+        /* === Responsive === */
+        @media (max-width: 768px) {
+            .navbar-nav,
+            .navbar-actions .btn-ghost:not(.keep-mobile) {
+                display: none;
+            }
+            .navbar-nav.open {
+                display: flex;
+                flex-direction: column;
+                position: absolute;
+                top: 62px;
+                left: 0; right: 0;
+                background: rgba(7,11,20,0.97);
+                border-bottom: 1px solid var(--c-border);
+                padding: 1rem 1.5rem;
+                gap: 0.3rem;
+            }
+            .navbar-toggle { display: block; }
+            .glass-card { padding: 1.25rem; }
+            .page-title { font-size: 1.5rem; }
+        }
+    </style>
+    {% block extra_css %}{% endblock %}
+</head>
+<body>
+
+    <!-- Navbar -->
+    <nav class="navbar">
+        <div class="navbar-inner">
+            <a class="navbar-brand" href="/">
+                <img src="{% static 'img/curex_logo.jpg' %}" alt="CureX Logo" class="brand-logo-img">
+                <span class="brand-name">CureX</span>
+            </a>
+
+            <ul class="navbar-nav" id="navMenu">
+                <li>
+                    <a class="nav-link" href="{% url 'chat_page' %}">
+                        <i class="bi bi-chat-square-dots"></i> Chat
+                    </a>
+                </li>
+                <li>
+                    <a class="nav-link" href="{% url 'doctors_page' %}">
+                        <i class="bi bi-person-badge"></i> Doctors
+                    </a>
+                </li>
+                <li>
+                    <a class="nav-link" href="{% url 'hospitals_page' %}">
+                        <i class="bi bi-hospital"></i> Hospitals
+                    </a>
+                </li>
+                {% if user.is_authenticated %}
+                <li>
+                    <a class="nav-link" href="{% url 'profile' %}">
+                        <i class="bi bi-person-bounding-box"></i> Profile
+                    </a>
+                </li>
+                {% endif %}
+                {% if user.is_staff %}
+                <li>
+                    <a class="nav-link" href="{% url 'manage_qa' %}">
+                        <i class="bi bi-database-gear"></i> Admin Q&A
+                    </a>
+                </li>
+                <li>
+                    <a class="nav-link" href="{% url 'view_users' %}">
+                        <i class="bi bi-people"></i> Users
+                    </a>
+                </li>
+                {% endif %}
+            </ul>
+
+            <div class="navbar-actions">
+                {% if user.is_authenticated %}
+                    <a class="btn-ghost keep-mobile" href="{% url 'profile' %}">
+                        <i class="bi bi-person-circle"></i>
+                        <span>{{ user.username }}</span>
+                    </a>
+                    <a class="btn-ghost" href="{% url 'logout' %}">
+                        <i class="bi bi-box-arrow-right"></i>
+                    </a>
+                {% else %}
+                    <a class="btn-ghost" href="{% url 'login' %}">
+                        <i class="bi bi-box-arrow-in-right"></i> Login
+                    </a>
+                    <a class="btn-primary" href="{% url 'register' %}">
+                        <i class="bi bi-person-plus"></i> Sign Up
+                    </a>
+                {% endif %}
+            </div>
+
+            <button class="navbar-toggle" id="navToggle" aria-label="Toggle navigation">
+                <i class="bi bi-list"></i>
+            </button>
+        </div>
+    </nav>
+
+    <!-- Flash Messages -->
+    {% if messages %}
+    <div style="max-width:1200px;margin:0.75rem auto;padding:0 1.5rem;">
+        {% for message in messages %}
+        <div class="alert alert-{{ message.tags }}" role="alert" id="msg-{{ forloop.counter }}">
+            <i class="bi bi-{% if message.tags == 'success' %}check-circle{% elif message.tags == 'danger' or message.tags == 'error' %}exclamation-circle{% elif message.tags == 'warning' %}exclamation-triangle{% else %}info-circle{% endif %}"></i>
+            <span>{{ message }}</span>
+            <button onclick="this.parentElement.remove()" style="margin-left:auto;background:none;border:none;color:inherit;cursor:pointer;font-size:1rem;padding:0 0.2rem;"><i class="bi bi-x"></i></button>
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    <!-- Main Content -->
+    <main class="main-content">
+        {% block content %}{% endblock %}
+    </main>
+
+    <script>
+        // Mobile nav toggle
+        document.getElementById('navToggle').addEventListener('click', function() {
+            const nav = document.getElementById('navMenu');
+            nav.classList.toggle('open');
+        });
+    </script>
+    {% block extra_js %}{% endblock %}
+</body>
+</html>

@@ -1,0 +1,277 @@
+{% extends 'base.html' %}
+
+{% block title %}View Users — CureX Admin{% endblock %}
+
+{% block extra_css %}
+<style>
+    .admin-page {
+        max-width: 1100px;
+        margin: 2rem auto;
+        padding: 0 1.5rem;
+    }
+
+    .admin-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 2rem;
+    }
+
+    .admin-title h1 {
+        font-family: 'Sora', sans-serif;
+        font-size: 1.8rem;
+        font-weight: 800;
+        margin-bottom: 0.3rem;
+        background: var(--c-grad-primary);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+    }
+
+    .admin-title p {
+        color: var(--c-text-secondary);
+        font-size: 0.875rem;
+    }
+
+    /* User Stats */
+    .admin-stats {
+        display: flex;
+        gap: 1.5rem;
+        margin-bottom: 2.5rem;
+    }
+
+    .stat-card {
+        flex: 1;
+        background: rgba(255,255,255,0.03);
+        border: 1px solid var(--c-border);
+        border-radius: 16px;
+        padding: 1.25rem 1.5rem;
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+    }
+
+    .stat-icon {
+        width: 44px;
+        height: 44px;
+        border-radius: 12px;
+        background: rgba(124,92,252,0.1);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.3rem;
+        color: #a78bfa;
+    }
+
+    .stat-info h3 {
+        font-size: 1.4rem;
+        font-weight: 800;
+        color: var(--c-text-primary);
+        line-height: 1;
+    }
+
+    .stat-info p {
+        font-size: 0.75rem;
+        color: var(--c-text-muted);
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        margin-top: 0.3rem;
+    }
+
+    /* Users Table */
+    .users-card {
+        background: rgba(255,255,255,0.02);
+        border: 1px solid var(--c-border);
+        border-radius: 20px;
+        overflow: hidden;
+    }
+
+    .table-wrapper {
+        overflow-x: auto;
+    }
+
+    table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+
+    th {
+        text-align: left;
+        background: rgba(255,255,255,0.04);
+        padding: 1rem 1.5rem;
+        font-weight: 700;
+        color: var(--c-text-muted);
+        text-transform: uppercase;
+        letter-spacing: 0.06em;
+        font-size: 0.7rem;
+        border-bottom: 1px solid var(--c-border);
+    }
+
+    td {
+        padding: 1.1rem 1.5rem;
+        color: var(--c-text-secondary);
+        border-bottom: 1px solid var(--c-border);
+        vertical-align: middle;
+        font-size: 0.875rem;
+    }
+
+    tr:last-child td { border-bottom: none; }
+
+    tr:hover td {
+        background: rgba(255,255,255,0.02);
+        color: var(--c-text-primary);
+    }
+
+    .user-profile {
+        display: flex;
+        align-items: center;
+        gap: 0.85rem;
+    }
+
+    .user-avatar {
+        width: 36px;
+        height: 36px;
+        border-radius: 10px;
+        background: var(--c-grad-primary);
+        color: white;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 700;
+        font-size: 0.9rem;
+    }
+
+    .user-name {
+        font-weight: 700;
+        color: var(--c-text-primary);
+    }
+
+    .user-email {
+        font-size: 0.75rem;
+        color: var(--c-text-muted);
+    }
+
+    .status-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.4rem;
+        padding: 0.25rem 0.65rem;
+        border-radius: 50px;
+        font-size: 0.72rem;
+        font-weight: 700;
+    }
+
+    .badge-staff { background: rgba(124,92,252,0.12); color: #a78bfa; }
+    .badge-active { background: rgba(0,212,170,0.12); color: var(--c-primary); }
+
+    .date-val { font-size: 0.82rem; }
+    .date-relative { font-size: 0.7rem; color: var(--c-text-muted); margin-top: 0.1rem; }
+
+    .empty-state {
+        text-align: center;
+        padding: 5rem 2rem;
+    }
+
+    .empty-state i {
+        font-size: 3rem;
+        color: var(--c-text-muted);
+        opacity: 0.3;
+        margin-bottom: 1.2rem;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="admin-page">
+
+    <div class="admin-header">
+        <div class="admin-title">
+            <h1>Platform Users</h1>
+            <p>Manage and monitor CureX community members.</p>
+        </div>
+    </div>
+
+    <div class="admin-stats">
+        <div class="stat-card">
+            <div class="stat-icon"><i class="bi bi-people"></i></div>
+            <div class="stat-info">
+                <h3>{{ users.count }}</h3>
+                <p>Total Registered</p>
+            </div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon" style="background:rgba(0,212,170,0.1);color:var(--c-primary);"><i class="bi bi-person-check"></i></div>
+            <div class="stat-info">
+                <h3>{{ users.count }}</h3>
+                <p>Active Members</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="users-card">
+        <div class="table-wrapper">
+            <table>
+                <thead>
+                    <tr>
+                        <th style="width:35%">User</th>
+                        <th style="width:20%">Status</th>
+                        <th style="width:25%">Joined Date</th>
+                        <th style="width:20%">Last Access</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for user_obj in users %}
+                    <tr>
+                        <td>
+                            <div class="user-profile">
+                                <div class="user-avatar">
+                                    {{ user_obj.username|first|upper }}
+                                </div>
+                                <div>
+                                    <div class="user-name">{{ user_obj.username }}</div>
+                                    <div class="user-email">{{ user_obj.email|default:"No email set" }}</div>
+                                </div>
+                            </div>
+                        </td>
+                        <td>
+                            {% if user_obj.is_staff %}
+                            <span class="status-badge badge-staff">
+                                <i class="bi bi-star-fill"></i> Staff
+                            </span>
+                            {% else %}
+                            <span class="status-badge badge-active">
+                                <i class="bi bi-check-circle-fill"></i> Member
+                            </span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <div class="date-val">{{ user_obj.date_joined|date:"M d, Y" }}</div>
+                            <div class="date-relative">{{ user_obj.date_joined|timesince }} ago</div>
+                        </td>
+                        <td>
+                            {% if user_obj.last_login %}
+                            <div class="date-val">{{ user_obj.last_login|date:"M d, Y" }}</div>
+                            <div class="date-relative">{{ user_obj.last_login|date:"H:i" }} today</div>
+                            {% else %}
+                            <div class="text-muted" style="font-size:0.75rem">Never logged in</div>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="4">
+                            <div class="empty-state">
+                                <i class="bi bi-people-fill"></i>
+                                <h3>No users found</h3>
+                                <p>The community is still waiting for its first member.</p>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+</div>
+{% endblock %}

@@ -1,0 +1,280 @@
+{% extends 'base.html' %}
+
+{% block title %}Manage Q&A — CureX Admin{% endblock %}
+
+{% block extra_css %}
+<style>
+    .admin-page {
+        max-width: 1000px;
+        margin: 2rem auto;
+        padding: 0 1.5rem;
+    }
+
+    .admin-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 2rem;
+    }
+
+    .admin-title h1 {
+        font-family: 'Sora', sans-serif;
+        font-size: 1.8rem;
+        font-weight: 800;
+        margin-bottom: 0.3rem;
+        background: var(--c-grad-primary);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+    }
+
+    .admin-title p {
+        color: var(--c-text-secondary);
+        font-size: 0.875rem;
+    }
+
+    .admin-stats {
+        display: flex;
+        gap: 1.5rem;
+        margin-bottom: 2.5rem;
+    }
+
+    .stat-card {
+        flex: 1;
+        background: rgba(255,255,255,0.03);
+        border: 1px solid var(--c-border);
+        border-radius: 16px;
+        padding: 1.25rem 1.5rem;
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+    }
+
+    .stat-icon {
+        width: 44px;
+        height: 44px;
+        border-radius: 12px;
+        background: rgba(0,212,170,0.1);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.3rem;
+        color: var(--c-primary);
+    }
+
+    .stat-info h3 {
+        font-size: 1.4rem;
+        font-weight: 800;
+        color: var(--c-text-primary);
+        line-height: 1;
+    }
+
+    .stat-info p {
+        font-size: 0.75rem;
+        color: var(--c-text-muted);
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        margin-top: 0.3rem;
+    }
+
+    /* Q&A Table */
+    .qa-card {
+        background: rgba(255,255,255,0.02);
+        border: 1px solid var(--c-border);
+        border-radius: 20px;
+        overflow: hidden;
+    }
+
+    .table-wrapper {
+        overflow-x: auto;
+    }
+
+    table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 0.9rem;
+    }
+
+    th {
+        text-align: left;
+        background: rgba(255,255,255,0.04);
+        padding: 1rem 1.5rem;
+        font-weight: 700;
+        color: var(--c-text-muted);
+        text-transform: uppercase;
+        letter-spacing: 0.056em;
+        font-size: 0.72rem;
+        border-bottom: 1px solid var(--c-border);
+    }
+
+    td {
+        padding: 1.2rem 1.5rem;
+        color: var(--c-text-secondary);
+        border-bottom: 1px solid var(--c-border);
+        vertical-align: top;
+    }
+
+    tr:last-child td { border-bottom: none; }
+
+    tr:hover td {
+        background: rgba(255,255,255,0.02);
+        color: var(--c-text-primary);
+    }
+
+    .qa-question {
+        font-weight: 600;
+        color: var(--c-text-primary);
+        margin-bottom: 0.4rem;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+    }
+
+    .qa-answer {
+        font-size: 0.85rem;
+        color: var(--c-text-muted);
+        line-height: 1.5;
+        max-width: 400px;
+        display: -webkit-box;
+        -webkit-line-clamp: 1;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+    }
+
+    .qa-label {
+        display: inline-block;
+        padding: 0.25rem 0.65rem;
+        border-radius: 5px;
+        background: rgba(124,92,252,0.1);
+        color: #a78bfa;
+        font-size: 0.75rem;
+        font-weight: 600;
+    }
+
+    .action-btns {
+        display: flex;
+        gap: 0.5rem;
+    }
+
+    .btn-action {
+        width: 32px;
+        height: 32px;
+        border-radius: 8px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border: 1px solid var(--c-border);
+        background: rgba(255,255,255,0.05);
+        color: var(--c-text-secondary);
+        cursor: pointer;
+        transition: all 0.2s;
+        text-decoration: none;
+    }
+
+    .btn-action:hover {
+        border-color: var(--c-primary);
+        color: var(--c-primary);
+        background: rgba(0,212,170,0.08);
+    }
+
+    .btn-action.btn-delete:hover {
+        border-color: #ff6b6b;
+        color: #ff6b6b;
+        background: rgba(255,107,107,0.08);
+    }
+
+    .empty-qa {
+        text-align: center;
+        padding: 4rem 2rem;
+    }
+
+    .empty-qa i {
+        font-size: 3rem;
+        color: var(--c-text-muted);
+        opacity: 0.3;
+        margin-bottom: 1rem;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="admin-page">
+
+    <div class="admin-header">
+        <div class="admin-title">
+            <h1>CureX Admin Q&A</h1>
+            <p>Refine the core medical knowledge database.</p>
+        </div>
+        <a href="{% url 'add_qa' %}" class="btn-primary">
+            <i class="bi bi-plus-lg"></i>
+            <span>Add Entry</span>
+        </a>
+    </div>
+
+    <div class="admin-stats">
+        <div class="stat-card">
+            <div class="stat-icon"><i class="bi bi-database"></i></div>
+            <div class="stat-info">
+                <h3>{{ qna_list.count }}</h3>
+                <p>Knowledge Base Entries</p>
+            </div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon" style="background:rgba(124,92,252,0.1);color:#a78bfa;"><i class="bi bi-activity"></i></div>
+            <div class="stat-info">
+                <h3>Active</h3>
+                <p>Knowledge Engine Status</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="qa-card">
+        <div class="table-wrapper">
+            <table>
+                <thead>
+                    <tr>
+                        <th style="width:50%">Question & Answer</th>
+                        <th style="width:25%">Category Label</th>
+                        <th style="width:15%">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for qna in qna_list %}
+                    <tr>
+                        <td>
+                            <div class="qa-question">{{ qna.question }}</div>
+                            <div class="qa-answer">{{ qna.answer }}</div>
+                        </td>
+                        <td>
+                            <span class="qa-label">{{ qna.label }}</span>
+                        </td>
+                        <td>
+                            <div class="action-btns">
+                                <a href="{% url 'edit_qa' qna.id %}" class="btn-action" title="Edit entry">
+                                    <i class="bi bi-pencil-square"></i>
+                                </a>
+                                <a href="{% url 'delete_qa' qna.id %}" class="btn-action btn-delete" title="Delete entry">
+                                    <i class="bi bi-trash3"></i>
+                                </a>
+                            </div>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="3">
+                            <div class="empty-qa">
+                                <i class="bi bi-inbox"></i>
+                                <h3>No knowledge base entries</h3>
+                                <p>Start by adding your first medical Q&A pair.</p>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+</div>
+{% endblock %}

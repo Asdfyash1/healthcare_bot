@@ -1,0 +1,149 @@
+{% extends 'base.html' %}
+
+{% block title %}Confirm Deletion — CureX Admin{% endblock %}
+
+{% block extra_css %}
+<style>
+    .delete-page {
+        max-width: 500px;
+        margin: 4rem auto;
+        padding: 0 1.5rem;
+        text-align: center;
+    }
+
+    .delete-card {
+        background: rgba(255,107,107,0.05);
+        border: 1px solid rgba(255,107,107,0.2);
+        border-radius: 24px;
+        padding: 2.5rem 2rem;
+        backdrop-filter: blur(20px);
+        -webkit-backdrop-filter: blur(20px);
+    }
+
+    .warning-icon {
+        width: 72px;
+        height: 72px;
+        border-radius: 50%;
+        background: rgba(255,107,107,0.1);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 2.2rem;
+        color: #ff6b6b;
+        margin: 0 auto 1.5rem;
+    }
+
+    .delete-card h2 {
+        font-family: 'Sora', sans-serif;
+        font-size: 1.4rem;
+        font-weight: 800;
+        color: var(--c-text-primary);
+        margin-bottom: 0.75rem;
+    }
+
+    .delete-card p {
+        color: var(--c-text-secondary);
+        font-size: 0.95rem;
+        line-height: 1.6;
+        margin-bottom: 1.5rem;
+    }
+
+    .item-preview {
+        background: rgba(0,0,0,0.2);
+        border: 1px solid var(--c-border);
+        border-radius: 12px;
+        padding: 1.25rem;
+        margin-bottom: 2rem;
+        text-align: left;
+    }
+
+    .item-preview label {
+        font-size: 0.72rem;
+        font-weight: 700;
+        color: var(--c-text-muted);
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        display: block;
+        margin-bottom: 0.4rem;
+    }
+
+    .item-preview .question {
+        font-weight: 600;
+        color: var(--c-text-primary);
+        font-size: 0.9rem;
+    }
+
+    .delete-actions {
+        display: flex;
+        flex-direction: column;
+        gap: 0.8rem;
+    }
+
+    .btn-delete-confirm {
+        background: #ff6b6b;
+        color: white;
+        border: none;
+        padding: 0.9rem;
+        border-radius: 12px;
+        font-size: 0.95rem;
+        font-weight: 700;
+        cursor: pointer;
+        width: 100%;
+        transition: all 0.2s;
+        box-shadow: 0 4px 15px rgba(255,107,107,0.3);
+    }
+
+    .btn-delete-confirm:hover {
+        background: #ff5252;
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(255,107,107,0.5);
+    }
+
+    .btn-cancel {
+        background: transparent;
+        color: var(--c-text-secondary);
+        border: 1px solid rgba(255,255,255,0.1);
+        padding: 0.9rem;
+        border-radius: 12px;
+        font-size: 0.95rem;
+        font-weight: 600;
+        text-decoration: none;
+        width: 100%;
+        transition: all 0.2s;
+        display: block;
+    }
+
+    .btn-cancel:hover {
+        background: rgba(255,255,255,0.05);
+        color: var(--c-text-primary);
+        border-color: var(--c-text-muted);
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="delete-page">
+
+    <div class="delete-card">
+        <div class="warning-icon">
+            <i class="bi bi-exclamation-triangle"></i>
+        </div>
+        <h2>Are you absolutely sure?</h2>
+        <p>This action cannot be undone. This knowledge entry will be permanently removed from the CureX engine.</p>
+
+        <div class="item-preview">
+            <label>Question to delete</label>
+            <div class="question">"{{ qna.question }}"</div>
+        </div>
+
+        <form method="post">
+            {% csrf_token %}
+            <div class="delete-actions">
+                <button type="submit" class="btn-delete-confirm">Yes, delete this entry</button>
+                <a href="{% url 'manage_qa' %}" class="btn-cancel">No, keep it</a>
+            </div>
+        </form>
+    </div>
+
+</div>
+{% endblock %}

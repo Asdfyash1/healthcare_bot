@@ -1,0 +1,352 @@
+{% extends 'base.html' %}
+
+{% block title %}Dashboard — CureX AI Health Companion{% endblock %}
+
+{% block extra_css %}
+<style>
+    .dashboard-container {
+        max-width: 1200px;
+        margin: 2rem auto;
+        padding: 0 1.5rem;
+        display: grid;
+        grid-template-columns: 1fr 2fr;
+        gap: 2rem;
+    }
+
+    /* Left Column: Sidebar */
+    .dashboard-sidebar {
+        display: flex;
+        flex-direction: column;
+        gap: 1.5rem;
+    }
+
+    .profile-card {
+        text-align: center;
+        padding-top: 3rem;
+    }
+
+    .profile-avatar-large {
+        width: 100px;
+        height: 100px;
+        border-radius: 30px;
+        background: var(--c-grad-primary);
+        color: white;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 2.5rem;
+        margin: 0 auto 1.5rem;
+        box-shadow: 0 0 30px rgba(0,212,170,0.25);
+    }
+
+    .profile-name {
+        font-family: 'Sora', sans-serif;
+        font-size: 1.8rem;
+        font-weight: 800;
+        margin-bottom: 0.25rem;
+    }
+
+    .profile-role {
+        font-size: 0.7rem;
+        font-weight: 800;
+        text-transform: uppercase;
+        letter-spacing: 0.15em;
+        color: var(--c-primary);
+        margin-bottom: 2rem;
+    }
+
+    .stat-row {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 0.75rem;
+        margin-bottom: 2rem;
+    }
+
+    .stat-box {
+        background: rgba(255,255,255,0.04);
+        padding: 1rem;
+        border-radius: 16px;
+        text-align: left;
+    }
+
+    .stat-box label {
+        display: block;
+        font-size: 0.65rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        color: var(--c-text-muted);
+        margin-bottom: 0.25rem;
+    }
+
+    .stat-box .val {
+        font-size: 1.2rem;
+        font-weight: 800;
+        color: var(--c-primary);
+    }
+
+    /* Tips section */
+    .tips-card h3 {
+        font-family: 'Sora', sans-serif;
+        font-size: 1.1rem;
+        margin-bottom: 1.5rem;
+    }
+
+    .tip-item {
+        display: flex;
+        gap: 1rem;
+        margin-bottom: 1.25rem;
+        padding-bottom: 1.25rem;
+        border-bottom: 1px solid var(--c-border);
+    }
+
+    .tip-item:last-child {
+        border-bottom: none;
+        margin-bottom: 0;
+        padding-bottom: 0;
+    }
+
+    .tip-icon {
+        width: 42px;
+        height: 42px;
+        border-radius: 12px;
+        background: rgba(255,255,255,0.05);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: var(--c-primary);
+        flex-shrink: 0;
+    }
+
+    .tip-content h4 {
+        font-size: 0.9rem;
+        font-weight: 700;
+        margin-bottom: 0.2rem;
+    }
+
+    .tip-content p {
+        font-size: 0.8rem;
+        color: var(--c-text-secondary);
+        line-height: 1.5;
+    }
+
+    /* Main Chart Area */
+    .dashboard-main {
+        display: flex;
+        flex-direction: column;
+        gap: 1.5rem;
+    }
+
+    .welcome-banner {
+        background: var(--c-grad-glow);
+        border: 1px solid var(--c-border-accent);
+        padding: 2.5rem;
+        border-radius: 28px;
+    }
+
+    .welcome-banner h2 {
+        font-family: 'Sora', sans-serif;
+        font-size: 2rem;
+        margin-bottom: 0.75rem;
+    }
+
+    .welcome-banner p {
+        color: var(--c-text-secondary);
+        font-size: 1rem;
+        max-width: 500px;
+    }
+
+    /* Activity Feed */
+    .activity-card {
+        padding: 0;
+        overflow: hidden;
+    }
+
+    .card-head {
+        padding: 1.5rem 2rem;
+        border-bottom: 1px solid var(--c-border);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .card-head h3 {
+        font-size: 1.1rem;
+        font-family: 'Sora', sans-serif;
+    }
+
+    .activity-list {
+        list-style: none;
+    }
+
+    .activity-item {
+        padding: 1.25rem 2rem;
+        display: flex;
+        align-items: center;
+        gap: 1.25rem;
+        border-bottom: 1px solid var(--c-border);
+        transition: background 0.2s;
+        cursor: pointer;
+    }
+
+    .activity-item:hover {
+        background: rgba(255,255,255,0.02);
+    }
+
+    .activity-item:last-child {
+        border-bottom: none;
+    }
+
+    .act-icon {
+        width: 48px;
+        height: 48px;
+        border-radius: 14px;
+        background: rgba(0,212,170,0.1);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: var(--c-primary);
+        font-size: 1.2rem;
+    }
+
+    .act-info {
+        flex: 1;
+    }
+
+    .act-info h4 {
+        font-size: 0.95rem;
+        margin-bottom: 0.15rem;
+        color: var(--c-text-primary);
+    }
+
+    .act-info span {
+        font-size: 0.75rem;
+        color: var(--c-text-muted);
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+    }
+
+    .act-status {
+        font-size: 0.7rem;
+        font-weight: 800;
+        padding: 0.35rem 0.75rem;
+        border-radius: 8px;
+        background: rgba(0,212,170,0.1);
+        color: var(--c-primary);
+        text-transform: uppercase;
+    }
+
+    .empty-state {
+        padding: 4rem 2rem;
+        text-align: center;
+        color: var(--c-text-muted);
+    }
+
+    @media (max-width: 900px) {
+        .dashboard-container { grid-template-columns: 1fr; }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="dashboard-container">
+    
+    <!-- Sidebar -->
+    <aside class="dashboard-sidebar">
+        
+        <div class="glass-card profile-card">
+            <div class="profile-avatar-large">
+                <i class="bi bi-person-heart"></i>
+            </div>
+            <h2 class="profile-name text-center">{{ user.username }}</h2>
+            <p class="profile-role text-center">Premium Healthcare Member</p>
+
+            <div class="stat-row">
+                <div class="stat-box">
+                    <label>Inquiries</label>
+                    <div class="val">{{ msg_count }}</div>
+                </div>
+                <div class="stat-box">
+                    <label>Blood Type</label>
+                    <div class="val">{{ medical_profile.blood_type }}</div>
+                </div>
+            </div>
+
+            <div style="display:flex; flex-direction:column; gap:0.75rem;">
+                <a href="{% url 'chat_page' %}" class="btn-primary w-100" style="padding:0.9rem; justify-content:center;">
+                    <i class="bi bi-chat-dots-fill"></i> New Consultation
+                </a>
+                <a href="{% url 'change_password' %}" class="btn-ghost w-100" style="padding:0.9rem; justify-content:center;">
+                    <i class="bi bi-shield-lock"></i> Security Settings
+                </a>
+            </div>
+        </div>
+
+        <div class="glass-card tips-card">
+            <h3>Daily Insights</h3>
+            {% for tip in tips %}
+            <div class="tip-item">
+                <div class="tip-icon"><i class="bi bi-{{ tip.icon }}"></i></div>
+                <div class="tip-content">
+                    <h4>{{ tip.title }}</h4>
+                    <p>{{ tip.desc }}</p>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+
+    </aside>
+
+    <!-- Main -->
+    <main class="dashboard-main">
+        
+        <div class="welcome-banner">
+            <h2>Welcome back, {{ user.first_name|default:user.username }}!</h2>
+            <p>Your AI health assistant is ready. You have no pending alerts today. Stay safe and healthy!</p>
+        </div>
+
+        <div class="glass-card activity-card">
+            <div class="card-head">
+                <h3>Recent Activity</h3>
+                <a href="{% url 'chat_page' %}" style="font-size:0.75rem; color:var(--c-primary); font-weight:700; text-decoration:none;">View All</a>
+            </div>
+
+            {% if recent_activity %}
+            <div class="activity-list">
+                {% for act in recent_activity %}
+                <div class="activity-item" onclick="window.location='{% url 'chat_page' %}';">
+                    <div class="act-icon"><i class="bi bi-chat-left-text"></i></div>
+                    <div class="act-info">
+                        <h4>{{ act.message|truncatechars:45 }}</h4>
+                        <span>{{ act.created_at|date:"M d, Y" }} at {{ act.created_at|date:"H:i" }}</span>
+                    </div>
+                    <div class="act-status">Completed</div>
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <div class="empty-state">
+                <i class="bi bi-chat-square-dots" style="font-size:2.5rem; display:block; margin-bottom:1rem; opacity:0.3;"></i>
+                <p>No recent activity found. Start a conversation with CureX AI!</p>
+                <a href="{% url 'chat_page' %}" class="btn-primary mt-3" style="display:inline-flex;">Get Started</a>
+            </div>
+            {% endif %}
+        </div>
+
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:1.5rem;">
+            <div class="glass-card" style="padding:1.5rem;">
+                <h3 style="font-size:1rem; margin-bottom:0.75rem;"><i class="bi bi-geo-alt-fill" style="color:var(--c-accent)"></i> Location Services</h3>
+                <p style="font-size:0.85rem; color:var(--c-text-secondary); margin-bottom:1.25rem;">Find the nearest healthcare providers based on your current location.</p>
+                <a href="{% url 'hospitals_page' %}" class="btn-ghost" style="font-size:0.8rem; padding:0.5rem 1rem;">Open Finder</a>
+            </div>
+            <div class="glass-card" style="padding:1.5rem;">
+                <h3 style="font-size:1rem; margin-bottom:0.75rem;"><i class="bi bi-heart-pulse-fill" style="color:var(--c-secondary)"></i> Medical Profile</h3>
+                <p style="font-size:0.85rem; color:var(--c-text-secondary); margin-bottom:1.25rem;">Complete your medical profile to get more personalized AI recommendations.</p>
+                <a href="{% url 'edit_medical_profile' %}" class="btn-ghost" style="font-size:0.8rem; padding:0.5rem 1rem; text-decoration:none;">Edit Info</a>
+            </div>
+        </div>
+
+    </main>
+
+</div>
+{% endblock %}

@@ -1,0 +1,128 @@
+{% extends 'base.html' %}
+
+{% block title %}Update Medical Profile — CureX AI{% endblock %}
+
+{% block extra_css %}
+<style>
+    .edit-profile-container {
+        max-width: 650px;
+        margin: 3rem auto;
+        padding: 0 1.5rem;
+    }
+
+    .form-card {
+        padding: 3rem;
+        background: rgba(255, 255, 255, 0.02);
+        border: 1px solid var(--c-border);
+        border-radius: 28px;
+        backdrop-filter: blur(10px);
+    }
+
+    .form-card h1 {
+        font-family: 'Sora', sans-serif;
+        font-size: 2rem;
+        margin-bottom: 0.75rem;
+        background: var(--c-grad-primary);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+    }
+
+    .form-card p {
+        color: var(--c-text-muted);
+        font-size: 0.95rem;
+        margin-bottom: 2.5rem;
+    }
+
+    .form-group {
+        margin-bottom: 1.8rem;
+    }
+
+    .form-group label {
+        display: block;
+        font-size: 0.75rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+        color: var(--c-text-secondary);
+        margin-bottom: 0.6rem;
+    }
+
+    .input-box {
+        width: 100%;
+        padding: 0.9rem 1.1rem;
+        background: rgba(255, 255, 255, 0.04);
+        border: 1px solid var(--c-border);
+        border-radius: 12px;
+        color: var(--c-text-primary);
+        font-family: 'Inter', sans-serif;
+        font-size: 0.95rem;
+        transition: all 0.2s ease;
+    }
+
+    .input-box:focus {
+        border-color: var(--c-primary);
+        background: rgba(0, 212, 170, 0.05);
+        outline: none;
+        box-shadow: 0 0 0 4px rgba(0, 212, 170, 0.1);
+    }
+
+    .btn-save {
+        width: 100%;
+        padding: 1rem;
+        font-size: 1rem;
+        font-weight: 700;
+        margin-top: 1rem;
+        justify-content: center;
+    }
+
+    .back-link {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        color: var(--c-text-muted);
+        text-decoration: none;
+        font-size: 0.85rem;
+        margin-top: 2rem;
+        transition: color 0.2s;
+    }
+
+    .back-link:hover {
+        color: var(--c-primary);
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="edit-profile-container">
+    <div class="form-card">
+        <h1>Medical Profile</h1>
+        <p>This information helps CureX AI provide more accurate and personalized health guidance.</p>
+        
+        <form method="POST">
+            {% csrf_token %}
+            
+            {% for field in form %}
+            <div class="form-group">
+                <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+                {{ field }}
+                {% if field.help_text %}
+                <div style="font-size: 0.75rem; color: var(--c-text-muted); margin-top: 0.4rem;">{{ field.help_text }}</div>
+                {% endif %}
+                {% for error in field.errors %}
+                <div style="color: #ff6b6b; font-size: 0.8rem; margin-top: 0.3rem;">{{ error }}</div>
+                {% endfor %}
+            </div>
+            {% endfor %}
+            
+            <button type="submit" class="btn-primary btn-save">
+                <i class="bi bi-shield-check"></i> Save Medical Data
+            </button>
+        </form>
+
+        <a href="{% url 'profile' %}" class="back-link">
+            <i class="bi bi-arrow-left"></i> Back to Dashboard
+        </a>
+    </div>
+</div>
+{% endblock %}

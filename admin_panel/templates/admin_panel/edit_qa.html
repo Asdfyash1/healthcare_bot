@@ -1,0 +1,205 @@
+{% extends 'base.html' %}
+
+{% block title %}Edit Q&A — CureX Admin{% endblock %}
+
+{% block extra_css %}
+<style>
+    .admin-form-page {
+        max-width: 650px;
+        margin: 2.5rem auto;
+        padding: 0 1.5rem;
+    }
+
+    .form-header {
+        display: flex;
+        align-items: center;
+        gap: 1.25rem;
+        margin-bottom: 2rem;
+    }
+
+    .header-icon {
+        width: 52px;
+        height: 52px;
+        border-radius: 14px;
+        background: var(--c-grad-primary);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.4rem;
+        color: white;
+        box-shadow: 0 0 24px rgba(0,212,170,0.3);
+    }
+
+    .form-header h1 {
+        font-family: 'Sora', sans-serif;
+        font-size: 1.5rem;
+        font-weight: 800;
+        background: var(--c-grad-primary);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        margin-bottom: 0.2rem;
+    }
+
+    .form-header p {
+        color: var(--c-text-secondary);
+        font-size: 0.875rem;
+    }
+
+    .qa-form-card {
+        background: rgba(255,255,255,0.03);
+        border: 1px solid var(--c-border);
+        border-radius: 20px;
+        padding: 2.2rem;
+    }
+
+    .form-group textarea.form-control {
+        min-height: 120px;
+        line-height: 1.6;
+        resize: vertical;
+    }
+
+    .btn-group {
+        display: flex;
+        gap: 0.75rem;
+        margin-top: 1.5rem;
+    }
+
+    .btn-submit {
+        flex: 1;
+        padding: 0.75rem;
+        border-radius: 10px;
+        font-size: 0.95rem;
+        font-weight: 700;
+        border: none;
+        background: var(--c-grad-primary);
+        color: white;
+        cursor: pointer;
+        transition: all 0.2s;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+    }
+
+    .btn-submit:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(0,212,170,0.4);
+    }
+
+    .btn-cancel {
+        padding: 0.75rem 1.5rem;
+        border-radius: 10px;
+        font-size: 0.95rem;
+        font-weight: 600;
+        border: 1px solid var(--c-border);
+        background: rgba(255,255,255,0.05);
+        color: var(--c-text-secondary);
+        text-decoration: none;
+        transition: all 0.2s;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .btn-cancel:hover {
+        background: rgba(255,255,255,0.1);
+        color: var(--c-text-primary);
+        border-color: var(--c-text-muted);
+    }
+
+    .field-hint {
+        font-size: 0.78rem;
+        color: var(--c-text-muted);
+        margin-top: 0.4rem;
+    }
+
+    .field-error {
+        color: #ff6b6b;
+        font-size: 0.8rem;
+        margin-top: 0.4rem;
+        display: flex;
+        align-items: center;
+        gap: 0.3rem;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="admin-form-page">
+
+    <div class="form-header">
+        <div class="header-icon">
+            <i class="bi bi-pencil-square"></i>
+        </div>
+        <div class="header-text">
+            <h1>Update Knowledge Entry</h1>
+            <p>Modify the medical question and corresponding response.</p>
+        </div>
+    </div>
+
+    <div class="qa-form-card">
+        <form method="post">
+            {% csrf_token %}
+
+            <!-- Question -->
+            <div class="form-group">
+                <label class="form-label" for="id_question">Medical Question</label>
+                <textarea
+                    name="question"
+                    id="id_question"
+                    class="form-control"
+                    required
+                >{{ form.question.value|default:qna.question }}</textarea>
+                <div class="field-hint">Natural language question users might ask.</div>
+                {% for error in form.question.errors %}
+                <div class="field-error"><i class="bi bi-exclamation-circle"></i> {{ error }}</div>
+                {% endfor %}
+            </div>
+
+            <!-- Answer -->
+            <div class="form-group">
+                <label class="form-label" for="id_answer">Expert Answer</label>
+                <textarea
+                    name="answer"
+                    id="id_answer"
+                    class="form-control"
+                    required
+                >{{ form.answer.value|default:qna.answer }}</textarea>
+                <div class="field-hint">Used as a base for AI enhancement. Supports Markdown.</div>
+                {% for error in form.answer.errors %}
+                <div class="field-error"><i class="bi bi-exclamation-circle"></i> {{ error }}</div>
+                {% endfor %}
+            </div>
+
+            <!-- Label -->
+            <div class="form-group">
+                <label class="form-label" for="id_label">Category Label</label>
+                <input
+                    type="text"
+                    name="label"
+                    id="id_label"
+                    class="form-control"
+                    value="{{ form.label.value|default:qna.label }}"
+                    required
+                >
+                <div class="field-hint">A short tag to categorize this topic.</div>
+                {% for error in form.label.errors %}
+                <div class="field-error"><i class="bi bi-exclamation-circle"></i> {{ error }}</div>
+                {% endfor %}
+            </div>
+
+            <div class="btn-group">
+                <button type="submit" class="btn-submit">
+                    <i class="bi bi-save"></i>
+                    <span>Apply Changes</span>
+                </button>
+                <a href="{% url 'manage_qa' %}" class="btn-cancel">
+                    <span>Cancel</span>
+                </a>
+            </div>
+        </form>
+    </div>
+
+</div>
+{% endblock %}

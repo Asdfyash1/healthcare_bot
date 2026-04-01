@@ -1,0 +1,5 @@
+{
+  "name": "HealthBot AI",
+  "description": "Premium AI Healthcare Chatbot powered by NVIDIA Nemotron",
+  "requestFramePermissions": ["geolocation"]
+}

@@ -1,0 +1,10 @@
+Django>=4.2,<5.0
+openai>=1.0
+numpy>=1.23
+pandas>=1.5
+pillow>=9.0
+whitenoise>=6.0
+googlemaps>=4.10
+gunicorn>=21.0
+dj-database-url>=2.1
+psycopg2-binary>=2.9
